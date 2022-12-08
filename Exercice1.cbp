@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Exercice1" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Exercice1" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Exercice1" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="afficherFile.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="afficherFile.h" />
+		<Unit filename="cas1.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cas1.h" />
+		<Unit filename="cas2.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cas2.h" />
+		<Unit filename="file_plus_court_exec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="file_plus_court_exec.h" />
+		<Unit filename="initialisation.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="initialisation.h" />
+		<Unit filename="insertion_file.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="insertion_file.h" />
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pbPlots.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pbPlots.h" />
+		<Unit filename="supportLib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="supportLib.h" />
+		<Unit filename="suppression.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="suppression.h" />
+		<Unit filename="typedefs.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

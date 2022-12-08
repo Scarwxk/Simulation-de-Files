@@ -1,0 +1,288 @@
+#include <stdio.h>
+
+#include <stdlib.h>
+
+#include <time.h>
+
+#include "pbPlots.h"
+#include "supportLib.h"
+
+#include "initialisation.h"
+#include "typedefs.h"
+
+
+void insertion_file(File_attente * file_attente, int numero_personne)
+{
+    /* Création du nouvel élément */
+    Personne * nouvelle_personne = malloc(sizeof( * nouvelle_personne));
+
+    if (file_attente == NULL || nouvelle_personne == NULL)
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    nouvelle_personne -> numero_personne = numero_personne;
+    nouvelle_personne -> temps_traitement = TEMPS_EXEC_MAX;
+
+    /* Insertion de la personne au début de la file_attente */
+    nouvelle_personne -> personne_suivante = file_attente -> premiere_personne;
+    file_attente -> premiere_personne = nouvelle_personne;
+}
+
+// Suppression d'une personne dans une file
+void suppression(File_attente * file_attente)
+{
+    if (file_attente == NULL)
+    {
+        exit(EXIT_FAILURE);
+    }
+    if (file_attente -> premiere_personne != NULL)
+    {
+
+        Personne * personne_supprimee = file_attente -> premiere_personne;
+        file_attente -> premiere_personne =
+            file_attente -> premiere_personne -> personne_suivante;
+        free(personne_supprimee);
+    }
+}
+
+void afficherFile(File_attente * file_attente)
+{
+    if (file_attente == NULL)
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    Personne * personne_actuelle = file_attente -> premiere_personne;
+    int temps_exec = 0;
+
+    // Boucle pour naviguer parmi toutes les personnes présentes dans la file
+    while (personne_actuelle != NULL)
+    {
+        printf("\nPersonne n* %d temps de traitement : %d",
+               personne_actuelle -> numero_personne,
+               personne_actuelle -> temps_traitement);
+
+        temps_exec += personne_actuelle -> temps_traitement;
+        personne_actuelle = personne_actuelle -> personne_suivante;
+    }
+
+    printf("\n\nTemps d'exec total de la file n*%d : %d \n\n",
+           file_attente -> numero_file_attente, temps_exec);
+}
+
+void file_plus_courte_exec(File_attente * file_attente[NOMBRE_FILES], int data_return[2])
+{
+    int temps_exec_min = 32 * TAILLE_MAX_FILE;
+    int file_temps_exec_min = 0;
+    for (int numero_file_attente = 0; numero_file_attente < NOMBRE_FILES; numero_file_attente++)
+    {
+        Personne * personne_actuelle = file_attente[numero_file_attente] -> premiere_personne;
+        int temps_exec = 0;
+
+        // Boucle pour naviguer parmi toutes les personnes présentes dans la file
+        while (personne_actuelle != NULL)
+        {
+            temps_exec += personne_actuelle -> temps_traitement;
+            personne_actuelle = personne_actuelle -> personne_suivante;
+        }
+
+        if (temps_exec < temps_exec_min)
+        {
+            temps_exec_min = temps_exec;
+            file_temps_exec_min = numero_file_attente;
+        }
+    }
+    data_return[0] = temps_exec_min;
+    data_return[1] = file_temps_exec_min;
+}
+
+
+/* Cas où l'on a 5 files pour 5 guichets et l'utilisateur choisit la moins
+ * longue */
+
+int casN1()
+{
+    File_attente * files_attentes[NOMBRE_FILES];
+
+    int position_file_courte = 0;
+    int taille_file_courte = TAILLE_MAX_FILE;
+
+    int file_rentable[2];
+
+    srand(time(NULL));
+
+    for (int numero_file = 0; numero_file < NOMBRE_FILES; numero_file++)
+    {
+        int taille_file_actuelle = rand() % TAILLE_MAX_FILE;
+
+        if (taille_file_actuelle < taille_file_courte)
+        {
+            taille_file_courte = taille_file_actuelle;
+            position_file_courte = numero_file;
+        }
+
+        files_attentes[numero_file] = initialisation_file(numero_file);
+
+        for (int y = 1; y < taille_file_actuelle; y++)
+        {
+            insertion_file(files_attentes[numero_file], y);
+        }
+            printf("supr...\n");
+
+        afficherFile(files_attentes[numero_file]);
+    }
+
+    file_plus_courte_exec(files_attentes, file_rentable);
+
+    int file_taille_exec_min = file_rentable[0];
+    int numero_file_temps_exec_min = file_rentable[1];
+
+    printf("\nLa file choisie par la derniere personne est la file n*%d \n\n",
+           position_file_courte);
+    printf("La file la plus courte au niveau du temps d'execution etait la file n*%d avec un temps d'execution de %d secondes\n", numero_file_temps_exec_min, file_taille_exec_min);
+    return 0;
+}
+
+/*
+5 guichets
+1 file
+rand personnes
+5 guichets se remplissent avec temps d'attente respectifs au personne
+comparaison de tous les temps d'attentes pour pouvoir attribuer la prochaine personne au guichet qui sera libre le plus rapidement.
+Une fois l'attribution effectuée, on soustrait le temps d'attente à tout les autres guichets.
+On répète ensuite jusqu'à ce que toutes les personnes soient passées.
+*/
+int casN2()
+{
+    File_attente * file_attente;
+
+    file_attente = initialisation_file(0);
+
+    srand(time(NULL));
+
+    int taille_file = 7 + rand() % TAILLE_MAX_FILE;
+    printf("%d\n", taille_file);
+
+    for (int y = 1; y < taille_file; y++)
+    {
+        insertion_file(file_attente, y);
+    }
+
+    int guichet1, guichet2, guichet3, guichet4, guichet5, temps_exec_total, temps_exec_guichet1, temps_exec_guichet2, temps_exec_guichet3,
+    temps_exec_guichet4, temps_exec_guichet5, nb_personnes_passees_guichet1, nb_personnes_passees_guichet2, nb_personnes_passees_guichet3,
+    nb_personnes_passees_guichet4, nb_personnes_passees_guichet5;
+
+    temps_exec_total = 0;
+    temps_exec_guichet1 = 0;
+    temps_exec_guichet2 = 0;
+    temps_exec_guichet3 = 0;
+    temps_exec_guichet4 = 0;
+    temps_exec_guichet5 = 0;
+    nb_personnes_passees_guichet1 = 0;
+    nb_personnes_passees_guichet2 = 0;
+    nb_personnes_passees_guichet3 = 0;
+    nb_personnes_passees_guichet4 = 0;
+    nb_personnes_passees_guichet5 = 0;
+
+    guichet1 = TEMPS_EXEC_MAX;
+
+    guichet2 = TEMPS_EXEC_MAX;
+
+    guichet3 = TEMPS_EXEC_MAX;
+
+    guichet4 = TEMPS_EXEC_MAX;
+
+    guichet5 = TEMPS_EXEC_MAX;
+
+    printf("Guichet 1 : %d\nGuichet 2 : %d\nGuichet 3 : %d\nGuichet 4 : %d\nGuichet 5 : %d\n",
+           guichet1, guichet2, guichet3, guichet4, guichet5);
+
+    while (file_attente -> premiere_personne -> personne_suivante != NULL)
+    {
+
+        if (guichet1 <= guichet2 && guichet1 <= guichet3 && guichet1 <= guichet4 && guichet1 <= guichet5 && file_attente -> premiere_personne -> personne_suivante != NULL)
+        {
+            temps_exec_total += guichet1;
+            printf("\nGuichet n*1 libre\nTemps du guichet : %d\nTemps d'execution total : %d\n", guichet1, temps_exec_total);
+            guichet2 -= guichet1;
+            guichet3 -= guichet1;
+            guichet4 -= guichet1;
+            guichet5 -= guichet1;
+            suppression(file_attente);
+            guichet1 = TEMPS_EXEC_MAX;
+            guichet1 = file_attente->premiere_personne->temps_traitement;
+            printf("\nGuichet 1 : %d\nGuichet 2 : %d\nGuichet 3 : %d\nGuichet 4 : %d\nGuichet 5 : %d\n",
+                   guichet1, guichet2, guichet3, guichet4, guichet5);
+        }
+
+        if (guichet2 < guichet1 && guichet2 <= guichet3 && guichet2 <= guichet4 && guichet2 <= guichet5 && file_attente -> premiere_personne -> personne_suivante != NULL)
+        {
+            temps_exec_total += guichet2;
+            printf("\nGuichet n*2 libre\nTemps du guichet : %d\nTemps d'execution total : %d\n", guichet2, temps_exec_total);
+            guichet1 -= guichet2;
+            guichet3 -= guichet2;
+            guichet4 -= guichet2;
+            guichet5 -= guichet2;
+            suppression(file_attente);
+            guichet2 = TEMPS_EXEC_MAX;
+            guichet2 = file_attente->premiere_personne->temps_traitement;
+            printf("\nGuichet 1 : %d\nGuichet 2 : %d\nGuichet 3 : %d\nGuichet 4 : %d\nGuichet 5 : %d\n",
+                   guichet1, guichet2, guichet3, guichet4, guichet5);
+        }
+
+        if (guichet3 < guichet1 && guichet3 <= guichet2 && guichet3 <= guichet4 && guichet3 <= guichet5 && file_attente -> premiere_personne -> personne_suivante != NULL)
+        {
+            temps_exec_total += guichet3;
+            printf("\nGuichet n*3 libre\nTemps du guichet : %d\nTemps d'execution total : %d\n", guichet3, temps_exec_total);
+            guichet1 -= guichet3;
+            guichet2 -= guichet3;
+            guichet4 -= guichet3;
+            guichet5 -= guichet3;
+            suppression(file_attente);
+            guichet3 = TEMPS_EXEC_MAX;
+            guichet3 = file_attente->premiere_personne->temps_traitement;
+            printf("\nGuichet 1 : %d\nGuichet 2 : %d\nGuichet 3 : %d\nGuichet 4 : %d\nGuichet 5 : %d\n",
+                   guichet1, guichet2, guichet3, guichet4, guichet5);
+        }
+
+        if (guichet4 < guichet1 && guichet4 <= guichet2 && guichet4 <= guichet3 && guichet4 <= guichet5 && file_attente -> premiere_personne -> personne_suivante != NULL)
+        {
+            temps_exec_total += guichet4;
+            printf("\nGuichet n*4 libre\nTemps du guichet : %d\nTemps d'execution total : %d\n", guichet4, temps_exec_total);
+            guichet1 -= guichet4;
+            guichet2 -= guichet4;
+            guichet3 -= guichet4;
+            guichet5 -= guichet4;
+            suppression(file_attente);
+            guichet4 = TEMPS_EXEC_MAX;
+            guichet4 = file_attente->premiere_personne->temps_traitement;
+            printf("\nGuichet 1 : %d\nGuichet 2 : %d\nGuichet 3 : %d\nGuichet 4 : %d\nGuichet 5 : %d\n",
+                   guichet1, guichet2, guichet3, guichet4, guichet5);
+        }
+
+        if (guichet5 < guichet1 && guichet5 <= guichet2 && guichet5 <= guichet3 && guichet5 <= guichet4 && file_attente -> premiere_personne -> personne_suivante != NULL)
+        {
+            temps_exec_total += guichet5;
+            printf("\nGuichet n*5 libre\nTemps du guichet : %d\nTemps d'execution total : %d\n", guichet5, temps_exec_total);
+            guichet1 -= guichet5;
+            guichet2 -= guichet5;
+            guichet3 -= guichet5;
+            guichet4 -= guichet5;
+            suppression(file_attente);
+            guichet5 = file_attente->premiere_personne->temps_traitement;
+            guichet5 = TEMPS_EXEC_MAX;
+            printf("\nGuichet 1 : %d\nGuichet 2 : %d\nGuichet 3 : %d\nGuichet 4 : %d\nGuichet 5 : %d\n",
+                   guichet1, guichet2, guichet3, guichet4, guichet5);
+        }
+    }
+    return 0;
+}
+
+int main()
+{
+    //casN1();
+    casN2();
+
+    return 0;
+}
